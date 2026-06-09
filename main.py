@@ -1,0 +1,173 @@
+"""
+main.py — Punto de entrada del Sistema de Gestión de Biblioteca Digital.
+
+Importa los módulos del paquete `models` y `gestion` para exponer
+las operaciones de Gestión de Libros a través de un menú de consola.
+"""
+
+from models import Libro  # noqa: F401  (disponible para uso futuro / herencia)
+from gestion import GestionLibros
+
+
+# ── helpers de entrada ────────────────────────────────────────────────────────
+
+def _leer_str(prompt: str) -> str:
+    valor = input(prompt).strip()
+    if not valor:
+        raise ValueError("El campo no puede estar vacío.")
+    return valor
+
+
+def _leer_int(prompt: str) -> int:
+    try:
+        return int(input(prompt).strip())
+    except ValueError:
+        raise ValueError("Debe ingresar un número entero válido.")
+
+
+# ── submenú libros ─────────────────────────────────────────────────────────────
+
+def _menu_libros(gestion: GestionLibros) -> None:
+    opciones = (
+        "\n── Gestión de Libros ──────────────────────"
+        "\n  1. Alta de libro"
+        "\n  2. Modificar libro"
+        "\n  3. Baja de libro"
+        "\n  4. Listar libros"
+        "\n  5. Buscar libro"
+        "\n  0. Volver al menú principal"
+        "\n────────────────────────────────────────────"
+    )
+
+    while True:
+        print(opciones)
+        opcion = input("Seleccioná una opción: ").strip()
+
+        if opcion == "1":
+            _alta_libro(gestion)
+        elif opcion == "2":
+            _modificar_libro(gestion)
+        elif opcion == "3":
+            _baja_libro(gestion)
+        elif opcion == "4":
+            _listar_libros(gestion)
+        elif opcion == "5":
+            _buscar_libro(gestion)
+        elif opcion == "0":
+            break
+        else:
+            print("[!] Opción inválida. Intentá de nuevo.")
+
+
+def _alta_libro(gestion: GestionLibros) -> None:
+    print("\n── Alta de Libro ──")
+    try:
+        titulo = _leer_str("  Título          : ")
+        autor = _leer_str("  Autor           : ")
+        isbn = _leer_str("  ISBN            : ")
+        anio = _leer_int("  Año publicación : ")
+        paginas = _leer_int("  Cantidad páginas: ")
+        libro = gestion.alta(titulo, autor, isbn, anio, paginas)
+        print(f"\n[✓] Libro registrado exitosamente:\n{libro}")
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
+def _modificar_libro(gestion: GestionLibros) -> None:
+    print("\n── Modificación de Libro ──")
+    if not gestion.listado():
+        print("[!] No hay libros registrados.")
+        return
+    try:
+        id_libro = _leer_int("  ID del libro a modificar: ")
+        print("  (Dejá en blanco los campos que no querés cambiar)")
+
+        campos: dict = {}
+        for campo, label, tipo in [
+            ("titulo",           "Nuevo título",           str),
+            ("autor",            "Nuevo autor",            str),
+            ("isbn",             "Nuevo ISBN",             str),
+            ("anio_publicacion", "Nuevo año publicación",  int),
+            ("cantidad_paginas", "Nueva cantidad páginas", int),
+        ]:
+            raw = input(f"  {label}: ").strip()
+            if raw:
+                campos[campo] = tipo(raw)
+
+        if not campos:
+            print("[!] No se realizaron cambios.")
+            return
+
+        libro = gestion.modificacion(id_libro, **campos)
+        print(f"\n[✓] Libro actualizado:\n{libro}")
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
+def _baja_libro(gestion: GestionLibros) -> None:
+    print("\n── Baja de Libro ──")
+    if not gestion.listado():
+        print("[!] No hay libros registrados.")
+        return
+    try:
+        id_libro = _leer_int("  ID del libro a eliminar: ")
+        libro = gestion.baja(id_libro)
+        print(f"[✓] Libro eliminado: {repr(libro)}")
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
+def _listar_libros(gestion: GestionLibros) -> None:
+    libros = gestion.listado()
+    if not libros:
+        print("\n[!] No hay libros registrados.")
+        return
+    print(f"\n── Listado de Libros ({len(libros)} registros) ──")
+    for libro in libros:
+        print(f"\n{libro}\n  {'─' * 40}")
+
+
+def _buscar_libro(gestion: GestionLibros) -> None:
+    print("\n── Búsqueda de Libro ──")
+    try:
+        termino = _leer_str("  Término de búsqueda (título / autor / ISBN): ")
+        resultados = gestion.buscar(termino)
+        if not resultados:
+            print("[!] No se encontraron coincidencias.")
+        else:
+            print(f"\n  {len(resultados)} resultado(s):")
+            for libro in resultados:
+                print(f"\n{libro}\n  {'─' * 40}")
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
+# ── menú principal ─────────────────────────────────────────────────────────────
+
+def main() -> None:
+    gestion_libros = GestionLibros()
+
+    menu_principal = (
+        "\n╔══════════════════════════════════════════╗"
+        "\n║   Sistema de Biblioteca Digital          ║"
+        "\n╠══════════════════════════════════════════╣"
+        "\n║  1. Gestión de Libros                    ║"
+        "\n║  0. Salir                                ║"
+        "\n╚══════════════════════════════════════════╝"
+    )
+
+    while True:
+        print(menu_principal)
+        opcion = input("Seleccioná una opción: ").strip()
+
+        if opcion == "1":
+            _menu_libros(gestion_libros)
+        elif opcion == "0":
+            print("\nHasta luego.\n")
+            break
+        else:
+            print("[!] Opción inválida. Intentá de nuevo.")
+
+
+if __name__ == "__main__":
+    main()
