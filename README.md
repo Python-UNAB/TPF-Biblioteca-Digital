@@ -2,6 +2,13 @@
 
 Sistema desarrollado en Python utilizando **Programación Orientada a Objetos** como Trabajo Práctico Final de la materia. Permite administrar libros, usuarios y préstamos desde una interfaz de consola interactiva.
 
+## Integrantes
+
+- Miguel Miguez
+- Rodrigo Podoba
+- Milena Iñiguez
+-
+
 ---
 
 ## Estructura del proyecto
