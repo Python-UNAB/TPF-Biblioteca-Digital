@@ -7,7 +7,6 @@ Sistema desarrollado en Python utilizando **Programación Orientada a Objetos** 
 - Miguel Miguez
 - Rodrigo Podoba
 - Milena Iñiguez
--
 
 ---
 
