@@ -56,7 +56,7 @@ class Libro(Recurso):
     def __init__(self, titulo: str, autor: str, anio: int, isbn: str, paginas: int):
         super().__init__(titulo, autor, anio)
         self.isbn = isbn
-        self. paginas = paginas
+        self.paginas = paginas
 
         def obtener_detalles(self) -> str:
             return f"[Libro Fisico] ID: {self.id} | {self.titulo} - {self.autor} (ISBN: {self.isbn})"
