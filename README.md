@@ -49,26 +49,26 @@ EntidadBase
     └── Prestamo
 ```
 
-| Clase            | Archivo                        | Responsabilidad                                                                                                                           |
-| ---------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `EntidadBase`    | `models/entidad_base.py`       | Clase padre de todas las entidades. Genera un ID auto-incremental y almacena la fecha de creación.                                        |
-| `Recurso`        | `models/recurso.py`            | Clase abstracta que actúa como **Sujeto** del patrón Observer. Administra su estado (disponible/prestado) y la lista de espera.           |
-| `Libro`          | `models/recurso.py`            | Recurso físico con ISBN y cantidad de páginas.                                                                                            |
-| `AudioLibro`     | `models/recurso.py`            | Recurso digital con duración en minutos y formato.                                                                                        |
-| `EstadoRecurso`  | `models/recurso_estados.py`    | Clase abstracta base del patrón **State** para los estados de un recurso.                                                                 |
-| `EstadoDisponible` | `models/recurso_estados.py`  | Estado concreto: permite préstamo y notifica observadores al volver a estar disponible.                                                   |
-| `EstadoPrestado` | `models/recurso_estados.py`    | Estado concreto: rechaza nuevos préstamos y permite devolución.                                                                           |
-| `RecursoFactory` | `models/recurso_factory.py`    | Creador abstracto del patrón **Factory Method** para recursos.                                                                            |
-| `LibroFactory`   | `models/recurso_factory.py`    | Fábrica concreta que crea instancias de `Libro`.                                                                                          |
-| `AudioLibroFactory` | `models/recurso_factory.py` | Fábrica concreta que crea instancias de `AudioLibro`.                                                                                     |
-| `Usuario`        | `models/usuario.py`            | Clase abstracta que actúa como **Observer**. Define `limite_prestamos()` y el método de notificación.                                    |
-| `Alumno`         | `models/usuario.py`            | Usuario con límite de 3 préstamos simultáneos.                                                                                            |
-| `Profesor`       | `models/usuario.py`            | Usuario con límite de 5 préstamos simultáneos.                                                                                            |
-| `UsuarioFactory` | `models/usuario_factory.py`    | Creador abstracto del patrón **Factory Method** para usuarios.                                                                            |
-| `AlumnoFactory`  | `models/usuario_factory.py`    | Fábrica concreta que crea instancias de `Alumno`.                                                                                         |
-| `ProfesorFactory`| `models/usuario_factory.py`    | Fábrica concreta que crea instancias de `Profesor`.                                                                                       |
-| `Prestamo`       | `models/prestamo.py`           | Asocia un `Usuario` con un `Recurso`. Registra fecha de préstamo y permite registrar la devolución.                                       |
-| `GestionLibros`  | `gestion/gestion_libros.py`    | Gestiona la colección de libros en memoria: alta, modificación, baja, listado y búsqueda.                                                 |
+| Clase               | Archivo                     | Responsabilidad                                                                                                                 |
+| ------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `EntidadBase`       | `models/entidad_base.py`    | Clase padre de todas las entidades. Genera un ID auto-incremental y almacena la fecha de creación.                              |
+| `Recurso`           | `models/recurso.py`         | Clase abstracta que actúa como **Sujeto** del patrón Observer. Administra su estado (disponible/prestado) y la lista de espera. |
+| `Libro`             | `models/recurso.py`         | Recurso físico con ISBN y cantidad de páginas.                                                                                  |
+| `AudioLibro`        | `models/recurso.py`         | Recurso digital con duración en minutos y formato.                                                                              |
+| `EstadoRecurso`     | `models/recurso_estados.py` | Clase abstracta base del patrón **State** para los estados de un recurso.                                                       |
+| `EstadoDisponible`  | `models/recurso_estados.py` | Estado concreto: permite préstamo y notifica observadores al volver a estar disponible.                                         |
+| `EstadoPrestado`    | `models/recurso_estados.py` | Estado concreto: rechaza nuevos préstamos y permite devolución.                                                                 |
+| `RecursoFactory`    | `models/recurso_factory.py` | Creador abstracto del patrón **Factory Method** para recursos.                                                                  |
+| `LibroFactory`      | `models/recurso_factory.py` | Fábrica concreta que crea instancias de `Libro`.                                                                                |
+| `AudioLibroFactory` | `models/recurso_factory.py` | Fábrica concreta que crea instancias de `AudioLibro`.                                                                           |
+| `Usuario`           | `models/usuario.py`         | Clase abstracta que actúa como **Observer**. Define `limite_prestamos()` y el método de notificación.                           |
+| `Alumno`            | `models/usuario.py`         | Usuario con límite de 3 préstamos simultáneos.                                                                                  |
+| `Profesor`          | `models/usuario.py`         | Usuario con límite de 5 préstamos simultáneos.                                                                                  |
+| `UsuarioFactory`    | `models/usuario_factory.py` | Creador abstracto del patrón **Factory Method** para usuarios.                                                                  |
+| `AlumnoFactory`     | `models/usuario_factory.py` | Fábrica concreta que crea instancias de `Alumno`.                                                                               |
+| `ProfesorFactory`   | `models/usuario_factory.py` | Fábrica concreta que crea instancias de `Profesor`.                                                                             |
+| `Prestamo`          | `models/prestamo.py`        | Asocia un `Usuario` con un `Recurso`. Registra fecha de préstamo y permite registrar la devolución.                             |
+| `GestionLibros`     | `gestion/gestion_libros.py` | Gestiona la colección de libros en memoria: alta, modificación, baja, listado y búsqueda.                                       |
 
 ---
 
@@ -91,10 +91,10 @@ notificar_observadores()
 
 El comportamiento de préstamo/devolución de `Recurso` depende del estado actual. En lugar de condicionales dispersos, cada estado encapsula su propia lógica:
 
-| Estado             | `prestar()`                        | `devolver()`                          |
-| ------------------ | ---------------------------------- | ------------------------------------- |
-| `EstadoDisponible` | Cambia a `EstadoPrestado` → `True` | Informa que ya estaba disponible → `False` |
-| `EstadoPrestado`   | Informa que ya está prestado → `False` | Cambia a `EstadoDisponible` → `True` |
+| Estado             | `prestar()`                            | `devolver()`                               |
+| ------------------ | -------------------------------------- | ------------------------------------------ |
+| `EstadoDisponible` | Cambia a `EstadoPrestado` → `True`     | Informa que ya estaba disponible → `False` |
+| `EstadoPrestado`   | Informa que ya está prestado → `False` | Cambia a `EstadoDisponible` → `True`       |
 
 ### Factory Method — Creación de entidades
 
