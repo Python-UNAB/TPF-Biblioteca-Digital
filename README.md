@@ -191,5 +191,4 @@ En lugar de definir un método con parámetros fijos para cada campo modificable
 
 | Módulo               | Clase principal                              | Estado    |
 | -------------------- | -------------------------------------------- | --------- |
-| Gestión de Usuarios  | `Usuario(EntidadBase)` / `GestionUsuarios`   | Pendiente |
 | Gestión de Préstamos | `Prestamo(EntidadBase)` / `GestionPrestamos` | Pendiente |
