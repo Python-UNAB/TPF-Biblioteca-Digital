@@ -32,6 +32,7 @@ TPF-Biblioteca-Digital/
 └── gestion/                       # Paquete: lógica de negocio / operaciones CRUD
     ├── __init__.py                # Exporta GestionLibros
     └── gestion_libros.py          # Alta, modificación, baja, listado y búsqueda de libros
+    └── gestion_prestamos.py       # Registro de préstamos, devoluciones y control de límites (Composición)
 ```
 
 ---
@@ -49,27 +50,27 @@ EntidadBase
     └── Prestamo
 ```
 
-| Clase               | Archivo                     | Responsabilidad                                                                                                                 |
-| ------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `EntidadBase`       | `models/entidad_base.py`    | Clase padre de todas las entidades. Genera un ID auto-incremental y almacena la fecha de creación.                              |
-| `Recurso`           | `models/recurso.py`         | Clase abstracta que actúa como **Sujeto** del patrón Observer. Administra su estado (disponible/prestado) y la lista de espera. |
-| `Libro`             | `models/recurso.py`         | Recurso físico con ISBN y cantidad de páginas.                                                                                  |
-| `AudioLibro`        | `models/recurso.py`         | Recurso digital con duración en minutos y formato.                                                                              |
-| `EstadoRecurso`     | `models/recurso_estados.py` | Clase abstracta base del patrón **State** para los estados de un recurso.                                                       |
-| `EstadoDisponible`  | `models/recurso_estados.py` | Estado concreto: permite préstamo y notifica observadores al volver a estar disponible.                                         |
-| `EstadoPrestado`    | `models/recurso_estados.py` | Estado concreto: rechaza nuevos préstamos y permite devolución.                                                                 |
-| `RecursoFactory`    | `models/recurso_factory.py` | Creador abstracto del patrón **Factory Method** para recursos.                                                                  |
-| `LibroFactory`      | `models/recurso_factory.py` | Fábrica concreta que crea instancias de `Libro`.                                                                                |
+| Clase           | Archivo                     | Responsabilidad                                                                                                                 |
+| --------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `EntidadBase`   | `models/entidad_base.py`    | Clase padre de todas las entidades. Genera un ID auto-incremental y almacena la fecha de creación.                              |
+| `Recurso`       | `models/recurso.py`         | Clase abstracta que actúa como **Sujeto** del patrón Observer. Administra su estado (disponible/prestado) y la lista de espera. |
+| `Libro`         | `models/recurso.py`         | Recurso físico con ISBN y cantidad de páginas.                                                                                  |
+| `AudioLibro`    | `models/recurso.py`         | Recurso digital con duración en minutos y formato.                                                                              |
+| `EstadoRecurso` | `models/recurso_estados.py` | Clase abstracta base del patrón **State** para los estados de un recurso.                                                       |
+| `EstadoDisponible` | `models/recurso_estados.py` | Estado concreto: permite préstamo y notifica observadores al volver a estar disponible.                                         |
+| `EstadoPrestado` | `models/recurso_estados.py` | Estado concreto: rechaza nuevos préstamos y permite devolución.                                                                 |
+| `RecursoFactory` | `models/recurso_factory.py` | Creador abstracto del patrón **Factory Method** para recursos.                                                                  |
+| `LibroFactory`  | `models/recurso_factory.py` | Fábrica concreta que crea instancias de `Libro`.                                                                                |
 | `AudioLibroFactory` | `models/recurso_factory.py` | Fábrica concreta que crea instancias de `AudioLibro`.                                                                           |
-| `Usuario`           | `models/usuario.py`         | Clase abstracta que actúa como **Observer**. Define `limite_prestamos()` y el método de notificación.                           |
-| `Alumno`            | `models/usuario.py`         | Usuario con límite de 3 préstamos simultáneos.                                                                                  |
-| `Profesor`          | `models/usuario.py`         | Usuario con límite de 5 préstamos simultáneos.                                                                                  |
-| `UsuarioFactory`    | `models/usuario_factory.py` | Creador abstracto del patrón **Factory Method** para usuarios.                                                                  |
-| `AlumnoFactory`     | `models/usuario_factory.py` | Fábrica concreta que crea instancias de `Alumno`.                                                                               |
-| `ProfesorFactory`   | `models/usuario_factory.py` | Fábrica concreta que crea instancias de `Profesor`.                                                                             |
-| `Prestamo`          | `models/prestamo.py`        | Asocia un `Usuario` con un `Recurso`. Registra fecha de préstamo y permite registrar la devolución.                             |
-| `GestionLibros`     | `gestion/gestion_libros.py` | Gestiona la colección de libros en memoria: alta, modificación, baja, listado y búsqueda.                                       |
-
+| `Usuario`       | `models/usuario.py`         | Clase abstracta que actúa como **Observer**. Define `limite_prestamos()` y el método de notificación.                           |
+| `Alumno`        | `models/usuario.py`         | Usuario con límite de 3 préstamos simultáneos.                                                                                  |
+| `Profesor`      | `models/usuario.py`         | Usuario con límite de 5 préstamos simultáneos.                                                                                  |
+| `UsuarioFactory` | `models/usuario_factory.py` | Creador abstracto del patrón **Factory Method** para usuarios.                                                                  |
+| `AlumnoFactory` | `models/usuario_factory.py` | Fábrica concreta que crea instancias de `Alumno`.                                                                               |
+| `ProfesorFactory` | `models/usuario_factory.py` | Fábrica concreta que crea instancias de `Profesor`.                                                                             |
+| `Prestamo`      | `models/prestamo.py`        | Asocia un `Usuario` con un `Recurso`. Registra fecha de préstamo y permite registrar la devolución.                             |
+| `GestionLibros` | `gestion/gestion_libros.py` | Gestiona la colección de libros en memoria: alta, modificación, baja, listado y búsqueda.                                       |
+| `GestionPrestamos` | `gestion/gestion_prestamos.py` | Coordina el ciclo de vida de las transacciones (altas y devoluciones), validando límites de usuario e interactuando con State y Observer. |
 ---
 
 ## Patrones de diseño aplicados
@@ -175,13 +176,30 @@ En lugar de definir un método con parámetros fijos para cada campo modificable
 
 ---
 
-### 5. Control de unicidad por ISBN
+### 7. Control de unicidad por ISBN
 
 `GestionLibros.alta()` y `GestionLibros.modificacion()` verifican que no existan dos libros con el mismo ISBN antes de confirmar la operación. El ISBN es el identificador natural de un libro en el dominio real, por lo que duplicarlo sería un error de negocio independientemente del ID interno.
 
 ---
 
-### 6. `main.py` como capa de presentación pura
+### 8. Lógica transaccional basada en Composición y Agregación
+El diseño del módulo de préstamos respeta la semántica de las relaciones estructurales de POO:
+* **Composición:** `GestionPrestamos` es dueña absoluta del ciclo de vida de los registros de transacciones individuales en sus listas internas.
+* **Agregación:** La clase `Prestamo` recibe e integra instancias completas de objetos de tipo `Usuario` y `Recurso` creados externamente, asegurando que sigan existiendo de manera independiente dentro del sistema si el préstamo finaliza.
+
+---
+
+### 9. Validación transaccional desacoplada
+`GestionPrestamos` no valida condicionales de disponibilidad manualmente; le delega la acción al recurso (`recurso.intentar_prestar()`). Si el patrón **State** determina que no es viable el préstamo, el gestor intercepta el flujo y utiliza el patrón **Observer** de forma nativa para anexar al usuario fallido dentro de la lista de espera del recurso en una sola operación coherente.
+
+---
+
+### 10. Contrato polimórfico de límites por rol
+La clase base `Usuario` define un contrato abstracto para `limite_prestamos()`. Alumnos y Profesores resuelven su propia política interna (3 y 5 respectivamente). `GestionPrestamos` consume este método de manera polimórfica mediante un conteo en memoria, eliminando bloques `if/else` basados en tipos de datos.
+
+---
+
+### 11. `main.py` como capa de presentación pura
 
 `main.py` únicamente maneja la interacción con el usuario (entrada/salida por consola). No contiene lógica de negocio ni manipula estructuras de datos directamente. Delega todas las operaciones a `GestionLibros`, respetando la separación entre **presentación** y **lógica de negocio**.
 
@@ -189,6 +207,6 @@ En lugar de definir un método con parámetros fijos para cada campo modificable
 
 ## Módulos pendientes (próximas iteraciones)
 
-| Módulo               | Clase principal                              | Estado    |
-| -------------------- | -------------------------------------------- | --------- |
-| Gestión de Préstamos | `Prestamo(EntidadBase)` / `GestionPrestamos` | Pendiente |
+| Módulo               | Clase principal                             | Estado    |
+|----------------------|---------------------------------------------| --------- |
+|              |                                             |  |
