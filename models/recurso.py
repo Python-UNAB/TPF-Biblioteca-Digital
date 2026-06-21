@@ -58,8 +58,8 @@ class Libro(Recurso):
         self.isbn = isbn
         self.paginas = paginas
 
-        def obtener_detalles(self) -> str:
-            return f"[Libro Fisico] ID: {self.id} | {self.titulo} - {self.autor} (ISBN: {self.isbn})"
+    def obtener_detalles(self) -> str:
+        return f"[Libro Fisico] ID: {self.id} | {self.titulo} - {self.autor} (ISBN: {self.isbn})"
 
 
 class AudioLibro(Recurso):
@@ -68,5 +68,5 @@ class AudioLibro(Recurso):
         self.duracion_minutos = duracion_minutos
         self.formato = formato
 
-        def obtener_detalles(self) -> str:
-            return f"[AudioLibro] ID: {self.id} | {self.titulo} - {self.autor} ({self.duracion_minutos} min | {self.formato})"
+    def obtener_detalles(self) -> str:
+        return f"[AudioLibro] ID: {self.id} | {self.titulo} - {self.autor} ({self.duracion_minutos} min | {self.formato})"
