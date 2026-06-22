@@ -6,7 +6,7 @@ las operaciones de Gestión de Libros a través de un menú de consola.
 """
 
 from models import Libro  # noqa: F401  (disponible para uso futuro / herencia)
-from gestion import GestionLibros, GestionUsuarios
+from gestion import GestionLibros, GestionUsuarios, GestionRecursos, GestionPrestamo
 
 
 # ── helpers de entrada ────────────────────────────────────────────────────────
@@ -262,11 +262,172 @@ def _buscar_usuario(gestion: GestionUsuarios) -> None:
         print(f"[!] Error: {e}")
 
 
+# ── submenú recursos ──────────────────────────────────────────────────────────
+
+def _menu_recursos(gestion: GestionRecursos) -> None:
+    opciones = (
+        "\n── Gestión de Recursos ─────────────────────"
+        "\n  1. Alta de recurso"
+        "\n  2. Listar recursos"
+        "\n  3. Buscar recurso"
+        "\n  0. Volver al menú principal"
+        "\n────────────────────────────────────────────"
+    )
+    while True:
+        print(opciones)
+        opcion = input("Seleccioná una opción: ").strip()
+        if opcion == "1":
+            _alta_recurso(gestion)
+        elif opcion == "2":
+            _listar_recursos(gestion)
+        elif opcion == "3":
+            _buscar_recurso(gestion)
+        elif opcion == "0":
+            break
+        else:
+            print("[!] Opción inválida. Intentá de nuevo.")
+
+
+def _alta_recurso(gestion: GestionRecursos) -> None:
+    print("\n── Alta de Recurso ──")
+    try:
+        tipo = _leer_str("  Tipo (libro / audiolibro): ").lower()
+        if tipo not in ("libro", "audiolibro"):
+            raise ValueError("El tipo debe ser 'libro' o 'audiolibro'.")
+        titulo = _leer_str("  Título          : ")
+        autor = _leer_str("  Autor           : ")
+        anio = _leer_int("  Año publicación : ")
+        if tipo == "libro":
+            isbn = _leer_str("  ISBN            : ")
+            paginas = _leer_int("  Cantidad páginas: ")
+            recurso = gestion.alta(tipo, titulo=titulo, autor=autor, anio=anio, isbn=isbn, paginas=paginas)
+        else:
+            duracion = _leer_int("  Duración (min)  : ")
+            formato = _leer_str("  Formato         : ")
+            recurso = gestion.alta(tipo, titulo=titulo, autor=autor, anio=anio, duracion_minutos=duracion, formato=formato)
+        print(f"\n[✓] Recurso registrado: {recurso.obtener_detalles()}")
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
+def _listar_recursos(gestion: GestionRecursos) -> None:
+    recursos = gestion.listado()
+    if not recursos:
+        print("\n[!] No hay recursos registrados.")
+        return
+    print(f"\n── Listado de Recursos ({len(recursos)} registros) ──")
+    for r in recursos:
+        estado = "Disponible" if r.esta_disponible else "Prestado"
+        print(f"  {r.obtener_detalles()} | Estado: {estado}")
+
+
+def _buscar_recurso(gestion: GestionRecursos) -> None:
+    print("\n── Búsqueda de Recurso ──")
+    try:
+        termino = _leer_str("  Término (título / autor): ")
+        resultados = gestion.buscar(termino)
+        if not resultados:
+            print("[!] No se encontraron coincidencias.")
+        else:
+            print(f"\n  {len(resultados)} resultado(s):")
+            for r in resultados:
+                estado = "Disponible" if r.esta_disponible else "Prestado"
+                print(f"  {r.obtener_detalles()} | Estado: {estado}")
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
+# ── submenú préstamos ──────────────────────────────────────────────────────────
+
+def _menu_prestamos(
+    prestamos: GestionPrestamo,
+    usuarios: GestionUsuarios,
+    recursos: GestionRecursos,
+) -> None:
+    opciones = (
+        "\n── Gestión de Préstamos ────────────────────"
+        "\n  1. Registrar préstamo"
+        "\n  2. Registrar devolución"
+        "\n  3. Listar préstamos activos"
+        "\n  0. Volver al menú principal"
+        "\n────────────────────────────────────────────"
+    )
+    while True:
+        print(opciones)
+        opcion = input("Seleccioná una opción: ").strip()
+        if opcion == "1":
+            _registrar_prestamo(prestamos, usuarios, recursos)
+        elif opcion == "2":
+            _registrar_devolucion(prestamos, recursos)
+        elif opcion == "3":
+            prestamos.consultar_prestamos_activos()
+        elif opcion == "0":
+            break
+        else:
+            print("[!] Opción inválida. Intentá de nuevo.")
+
+
+def _registrar_prestamo(
+    prestamos: GestionPrestamo,
+    usuarios: GestionUsuarios,
+    recursos: GestionRecursos,
+) -> None:
+    print("\n── Registrar Préstamo ──")
+    lista_usuarios = usuarios.listado()
+    if not lista_usuarios:
+        print("[!] No hay usuarios registrados.")
+        return
+    lista_recursos = recursos.listado()
+    if not lista_recursos:
+        print("[!] No hay recursos registrados.")
+        return
+
+    print("\n  Usuarios:")
+    for u in lista_usuarios:
+        print(f"    ID: {u.id} | {u.apellido}, {u.nombre} ({u.__class__.__name__})")
+
+    print("\n  Recursos:")
+    for r in lista_recursos:
+        estado = "Disponible" if r.esta_disponible else "Prestado"
+        print(f"    {r.obtener_detalles()} | {estado}")
+
+    try:
+        id_usuario = _leer_int("\n  ID del usuario  : ")
+        id_recurso = _leer_int("  ID del recurso  : ")
+
+        usuario = next((u for u in lista_usuarios if u.id == id_usuario), None)
+        if usuario is None:
+            raise ValueError(f"No se encontró ningún usuario con ID {id_usuario}.")
+
+        recurso = recursos.obtener_por_id(id_recurso)
+        if recurso is None:
+            raise ValueError(f"No se encontró ningún recurso con ID {id_recurso}.")
+
+        prestamos.registrar_prestamo(usuario, recurso)
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
+def _registrar_devolucion(prestamos: GestionPrestamo, recursos: GestionRecursos) -> None:
+    print("\n── Registrar Devolución ──")
+    prestamos.consultar_prestamos_activos()
+    try:
+        id_recurso = _leer_int("\n  ID del recurso a devolver: ")
+        recurso = recursos.obtener_por_id(id_recurso)
+        if recurso is None:
+            raise ValueError(f"No se encontró ningún recurso con ID {id_recurso}.")
+        prestamos.registrar_devolucion(recurso)
+    except ValueError as e:
+        print(f"[!] Error: {e}")
+
+
 # ── menú principal ─────────────────────────────────────────────────────────────
 
 def main() -> None:
     gestion_libros = GestionLibros()
     gestion_usuarios = GestionUsuarios()
+    gestion_recursos = GestionRecursos()
+    gestion_prestamos = GestionPrestamo()
 
     menu_principal = (
         "\n╔══════════════════════════════════════════╗"
@@ -274,6 +435,8 @@ def main() -> None:
         "\n╠══════════════════════════════════════════╣"
         "\n║  1. Gestión de Libros                    ║"
         "\n║  2. Gestión de Usuarios                  ║"
+        "\n║  3. Gestión de Recursos                  ║"
+        "\n║  4. Gestión de Préstamos                 ║"
         "\n║  0. Salir                                ║"
         "\n╚══════════════════════════════════════════╝"
     )
@@ -286,6 +449,10 @@ def main() -> None:
             _menu_libros(gestion_libros)
         elif opcion == "2":
             _menu_usuarios(gestion_usuarios)
+        elif opcion == "3":
+            _menu_recursos(gestion_recursos)
+        elif opcion == "4":
+            _menu_prestamos(gestion_prestamos, gestion_usuarios, gestion_recursos)
         elif opcion == "0":
             print("\nHasta luego.\n")
             break

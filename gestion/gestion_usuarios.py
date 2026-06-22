@@ -1,9 +1,11 @@
 from typing import List, Optional
 
 from models import Usuario, AlumnoFactory, ProfesorFactory
+from gestion.metaclases import MetaGestor
+from gestion.decoradores import validar_cadenas
 
 
-class GestionUsuarios:
+class GestionUsuarios(metaclass=MetaGestor):
     """Gestiona el ciclo de vida de los usuarios (Alumnos y Profesores): alta, modificación, baja, listado y búsqueda."""
 
     def __init__(self):
@@ -21,6 +23,7 @@ class GestionUsuarios:
         return next((u for u in self._usuarios if u.dni == dni), None)
 
     # ── operaciones públicas ──────────────────────────────────────────────────
+    @validar_cadenas
     def alta(
         self,
         tipo: str,
@@ -88,6 +91,7 @@ class GestionUsuarios:
         """Retorna una copia de la lista de usuarios registrados."""
         return list(self._usuarios)
 
+    @validar_cadenas
     def buscar(self, termino: str) -> List[Usuario]:
         """Búsqueda parcial (case-insensitive) por nombre, apellido, DNI o correo."""
         termino = termino.lower()

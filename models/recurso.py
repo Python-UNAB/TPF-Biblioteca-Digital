@@ -22,6 +22,10 @@ class Recurso(EntidadBase):
         if isinstance(nuevo_estado, EstadoDisponible):
             self.notificar_observadores()
 
+    @property
+    def esta_disponible(self) -> bool:
+        return isinstance(self._estado, EstadoDisponible)
+
     def intentar_prestar(self) -> bool:
         return self._estado.prestar(self)
 

@@ -1,9 +1,11 @@
 from typing import List, Optional
 
 from models.libro import Libro
+from gestion.metaclases import MetaGestor
+from gestion.decoradores import validar_cadenas
 
 
-class GestionLibros:
+class GestionLibros(metaclass=MetaGestor):
     """Gestiona el ciclo de vida de los libros: alta, modificación, baja y listado."""
 
     def __init__(self):
@@ -17,6 +19,7 @@ class GestionLibros:
         return next((l for l in self._libros if l.isbn == isbn), None)
 
     # ── operaciones públicas ──────────────────────────────────────────────────
+    @validar_cadenas
     def alta(
         self,
         titulo: str,
@@ -67,6 +70,7 @@ class GestionLibros:
         """Retorna una copia de la lista de libros registrados."""
         return list(self._libros)
 
+    @validar_cadenas
     def buscar(self, termino: str) -> List[Libro]:
         """Búsqueda parcial (case-insensitive) por título, autor o ISBN."""
         termino = termino.lower()
