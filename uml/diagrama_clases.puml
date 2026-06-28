@@ -1,0 +1,162 @@
+@startuml
+title Sistema de Gestión de Biblioteca Digital
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+package "Modelos" {
+
+abstract class EntidadBase{
+-id:int
+-fecha_creacion:datetime
+}
+
+abstract class Usuario{
+-nombre
+-apellido
+-dni
+-correo
++actualizar_notificacion()
++limite_prestamos()
+}
+
+class Alumno{
++limite_prestamos()
+}
+
+class Profesor{
++limite_prestamos()
+}
+
+abstract class Recurso{
+-titulo
+-autor
+-anio
+-estado
+-observadores
++intentar_prestar()
++intentar_devolver()
++agregar_observador()
++remover_observador()
++notificar_observadores()
+}
+
+class Libro{
+-isbn
+-paginas
++obtener_detalles()
+}
+
+class AudioLibro{
+-duracion_minutos
+-formato
++obtener_detalles()
+}
+
+class Prestamo{
+-fecha_prestamo
+-fecha_devolucion
++registrar_devolucion()
+}
+
+abstract class EstadoRecurso{
++prestar()
++devolver()
+}
+
+class EstadoDisponible
+class EstadoPrestado
+
+abstract class RecursoFactory{
++crear_recurso()
+}
+
+class LibroFactory
+class AudioLibroFactory
+
+abstract class UsuarioFactory{
++crear_usuario()
+}
+
+class AlumnoFactory
+class ProfesorFactory
+}
+
+package "Gestión" {
+
+class GestionLibros{
++alta()
++modificacion()
++baja()
++listado()
++buscar()
+}
+
+class GestionUsuarios{
++alta()
++modificacion()
++baja()
++listado()
++buscar()
+}
+
+class GestionRecursos{
++alta()
++modificacion()
++baja()
++listado()
++buscar()
+}
+
+class GestionPrestamo{
++registrar_prestamo()
++registrar_devolucion()
++consultar_prestamos_activos()
+}
+
+class MetaGestor <<metaclass>>
+class validar_cadenas <<decorator>>
+}
+
+EntidadBase <|-- Usuario
+EntidadBase <|-- Recurso
+EntidadBase <|-- Prestamo
+
+Usuario <|-- Alumno
+Usuario <|-- Profesor
+
+Recurso <|-- Libro
+Recurso <|-- AudioLibro
+
+EstadoRecurso <|-- EstadoDisponible
+EstadoRecurso <|-- EstadoPrestado
+
+Recurso *-- EstadoRecurso
+
+Prestamo o-- Usuario
+Prestamo o-- Recurso
+
+GestionPrestamo *-- Prestamo
+GestionPrestamo --> Usuario
+GestionPrestamo --> Recurso
+
+GestionLibros --> Libro
+GestionUsuarios --> Usuario
+GestionRecursos --> Recurso
+
+RecursoFactory <|-- LibroFactory
+RecursoFactory <|-- AudioLibroFactory
+
+UsuarioFactory <|-- AlumnoFactory
+UsuarioFactory <|-- ProfesorFactory
+
+MetaGestor ..> GestionLibros
+MetaGestor ..> GestionUsuarios
+MetaGestor ..> GestionRecursos
+
+validar_cadenas ..> GestionLibros
+validar_cadenas ..> GestionUsuarios
+validar_cadenas ..> GestionRecursos
+
+@enduml
