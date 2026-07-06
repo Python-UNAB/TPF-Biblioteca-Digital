@@ -263,7 +263,7 @@ En lugar de utilizar clases abstractas (`ABC`) para forzar la implementación de
 El sistema mantiene dos colecciones con responsabilidades distintas:
 
 - **`GestionLibros`** administra el catálogo bibliográfico usando el modelo `models.libro.Libro`. Es una entidad de referencia con validaciones de unicidad por ISBN y soporte para modificación de cualquier campo.
-- **`GestionRecursos`** administra los ejemplares físicos y digitales disponibles para préstamo usando el modelo `models.recurso.Libro` y `AudioLibro`. Estos objetos incorporan State y Observer y son los que circulan en el sistema de transacciones.
+- **`GestionRecursos`** administra los ejemplares físicos y digitales disponibles para préstamo usando el modelo `models.recurso.Libro` y `AudioLibro`. Estos objetos incorporan State y Observer y son los que circulan en el sistema de transacciones
 
 Esta separación permite que el catálogo bibliográfico sea independiente del inventario operativo, reflejando una distinción real del dominio: un título puede existir en el catálogo aunque no haya ningún ejemplar disponible para préstamo.
 
