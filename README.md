@@ -9,6 +9,7 @@ Sistema desarrollado en Python utilizando **Programación Orientada a Objetos** 
 - Milena Iñiguez
 - Damián Larrascq Mechoso
 
+
 ---
 
 ## Estructura del proyecto
